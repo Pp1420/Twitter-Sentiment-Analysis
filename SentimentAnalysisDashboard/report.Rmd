@@ -1,0 +1,194 @@
+---
+title: "Lexicon-Based Sentiment Analysis on Twitter Posts"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 7
+    highlight: tango
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    toc_depth: 2
+    toc_float: yes
+  pdf_document: default
+  word_document:
+    toc: yes
+    toc_depth: '2'
+params:
+  n: NA
+---
+
+
+```{r setup, include=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<!-- ```{r} -->
+<!-- library(shiny) -->
+<!-- library(shinydashboard) -->
+<!-- library(dplyr) -->
+<!-- library(leaflet) -->
+<!-- library(ggplot2) -->
+<!-- library(tidyverse) -->
+<!-- library(DT) -->
+<!-- library(plotly) -->
+<!-- library(purrr) -->
+<!-- library(glue) -->
+<!-- library(rhandsontable) -->
+<!-- library(tidyr) -->
+<!-- library(shinyalert) -->
+<!-- library(shinyjs) -->
+<!-- library(supercaliheatmapwidget) -->
+<!-- library(lubridate) -->
+<!-- library(vistime) -->
+<!-- library(timevis) -->
+<!-- library(rmarkdown) -->
+
+
+
+<!-- raw_data_tasks <- read.csv("./Data/task_tracker.csv") -->
+<!-- raw_data_projects <- read.csv("./Data/project_tracker.csv") -->
+<!-- raw_data_team <- read.csv("./Data/team_tracker.csv") -->
+<!-- raw_data_time <- read.csv("./Data/time_tracker.csv") -->
+<!-- raw_data_time$day <- dmy(raw_data_time$day) -->
+
+<!-- ``` -->
+
+
+
+
+# **Word Cloud - Visualize the most frequent words used**
+
+```{r message=FALSE, warning=FALSE}
+
+ ##---------------Home page / Total Number of Tweets------------------------------------------
+    
+hw <- wordcloud(words = names(word_freqs), 
+                freq = word_freqs,
+                max.words = 200,
+                random.order = FALSE,
+                min.freq = 5,
+                colors = brewer.pal(8, 'Dark2'),
+                scale = c(5, 0.3),
+                rot.per = 0.7)
+
+  
+          
+
+  
+```    
+
+
+# **Words Stored in Lexicons**  
+```{r message=FALSE, warning=FALSE}
+ggplot(tib_rows, aes(x = tibble_name, y = num_rows_tib, fill = tibble_name)) +
+      geom_bar(stat = "identity") +
+      geom_text(aes(label = num_rows_tib), vjust = -0.5) +
+      ylab("Words Stored") +
+      xlab("Lexicons") +
+      ggtitle("Comparison of Words Stored in Lexicons") +
+      scale_fill_manual(name = "Lexicons", values = c(Bing = "#009E73", NRC = "#D55E00", Syuzhet = "#0072B2")) +
+      theme(plot.title = element_text(size = 18, face = "bold"))
+```  
+
+
+# **Density Plot - Polarity Distribution with Syuzhet Lexicon**  
+```{r message=FALSE, warning=FALSE}
+
+  ##---------------Home page / Polarity Distribution--------------------------------------------------------------
+    
+brkSyuTweetTest %>% 
+  ggplot(aes(x = syuzhet, fill = Sentiment)) +
+  geom_density(alpha = 0.7, color = 'black') +
+  ggtitle("Density Plot") +
+  xlim(-10, 10)
+        
+    
+
+```
+
+
+  
+      
+
+# **Most Frequent Words by Bing Lexicons**
+```{r message=FALSE, warning=FALSE}
+
+    ##---------------Home page / Most Frequent Words by Bing-------------------------------------------------  
+
+bingTop20words %>%
+  ggplot(aes(word, n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = "free_y") +
+  labs(y = "Sentiment" , x = NULL) +
+  coord_flip() +
+  ggtitle("Top 20 Words Using Bing Lexicon")
+    
+```
+
+
+# **Most Frequent Words by NRC Lexicons**
+```{r message=FALSE, warning=FALSE}
+
+    ##---------------Home page / Most Frequent Words by NRC-------------------------------------------------  
+
+nrcTop20words %>%
+  ggplot(aes(word, n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = "free_y") +
+  labs(y = "Sentiment" , x = NULL) +
+  coord_flip() +
+  ggtitle("Top 20 Words Using NRC Lexicon")
+    
+```
+
+# **Most Frequent Negative Words by Syuzhet Lexicons**
+```{r message=FALSE, warning=FALSE}
+
+    ##---------------Home page / Most Frequent Words by Syuzhet------------------------------------------------- 
+
+ggplot() +
+  geom_col(data = neg_syuzhet, aes(word, n, fill = impact), show.legend = FALSE) +
+  scale_fill_gradient(low = "red", high = "green") +
+  labs(y = "Impact" , x = NULL) +
+  coord_flip() +
+  ggtitle("Top 20 Negative Words Using Syuzhet Lexicon")
+
+```
+
+
+# **Most Frequent Positive Words by Syuzhet Lexicons**
+```{r message=FALSE, warning=FALSE}
+
+
+ggplot() +
+  geom_col(data = pos_syuzhet, aes(word, n, fill = impact), show.legend = FALSE) +
+  scale_fill_gradient(low = "red", high = "green") +
+  labs(y = "Impact" , x = NULL) +
+  coord_flip() +
+  ggtitle("Top 20 Positive Words Using Syuzhet Lexicon")
+
+
+
+```
+  
+
+
+# **Accuracies of Models**
+```{r message=FALSE, warning=FALSE}
+
+  ##---------------Home page /Accuracies------------------------------------------------- 
+  
+ggplot(data = accuracy_df, aes(x = model_names, y = accuracies*100)) +
+  geom_bar(stat = "identity", fill = "skyblue", width = 0.5) +
+  geom_text(aes(label = paste0(round(accuracies * 100, 1), "%")), vjust = -0.5, size = 4) +
+  labs(x = "", y = "Accuracy(%)", title = "Comparison of Model Accuracies") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5), 
+        axis.text = element_text(size = 12), 
+        axis.title = element_text(size = 14, face = "bold"))
+
+
+```
